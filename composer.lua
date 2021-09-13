@@ -1,7 +1,9 @@
 -- COMPOSER.
 --
--- polyphonic piano roll pattern sequencer.
--- for when everything else on norns is too weird.
+-- polyphonic piano roll
+-- pattern sequencer.
+-- for when everything else on norns 
+-- is too weird.
 --
 -- requires grid.
 --
@@ -10,12 +12,15 @@
 -- E3: move grid editing window on time axis
 --
 -- K1: (nothing)
--- K2 (lift): stop if playing, reset if stopped
--- K3 (lift): play if stopped, reset if playing
+-- K2 (lift): stop if playing, 
+--              reset if stopped
+-- K3 (lift): play if stopped, 
+--              reset if playing
 --
 -- grid:
--- press keys to toggle notes on and off.
--- lower right key toggles pattern selection (top row)
+-- press keys to toggle notes
+-- lower right key 
+--     toggles pattern selection (top row)
 --
 -- TODO: midi output, ties, engine
 
@@ -242,9 +247,9 @@ redraw = function()
   screen.level(15)
   screen.move(36, 56)
   if stop_key_held then
-    screen.blend_mode(12)
+    screen.level(9)
   else
-    screen.blend_mode(0)
+    screen.level(15)
   end
   if running then
     screen.text('STOP')
@@ -255,9 +260,9 @@ redraw = function()
   ---- play/stop labels
   screen.move(78, 56)
   if play_key_held then
-    screen.blend_mode(12)
+    screen.level(9)
   else
-    screen.blend_mode(0)
+    screen.level(15)
   end
   if running then
     screen.text('RESET')
