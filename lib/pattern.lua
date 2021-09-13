@@ -12,7 +12,7 @@ function Pattern.new()
     for i=1,Pattern.MAX_LENGTH do
       p.stages[i] = Stage.new()
     end
-    p.length = Pattern.MAX_LENGTH
+    p.length = 16
     return p
 end 
 

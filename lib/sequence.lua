@@ -19,10 +19,10 @@ end
 
 -- returns current stage data, advances stage counter
 function Sequence:step()
-  print('stepping; pattern = ' ++ self.pattern)
+  --print('stepping (sequence)...')
   local stage = nil
   if self.pattern ~= nil then
-    stage = self.pattern.stages[idx]
+    stage = self.pattern.stages[self.idx]
   end
   self.idx = self.idx + 1
   if self.idx > self.pattern.length then
