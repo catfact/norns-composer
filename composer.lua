@@ -1,18 +1,30 @@
 musicutil = require ('musicutil')
 
+
 Pattern = include('lib/pattern')
 Sequence = include('lib/sequence')
-Gui = include('lib/grid_ui')
 
 engine.name = 'PolyPerc'
 
 NUM_PATTERNS = 16
+
 pat = {}
 for i=1,NUM_PATTERNS do 
   pat[i] = Pattern.new() 
 end
 
-seq = Sequence.new(pat[1])
+cur_pat = 1
+seq = Sequence.new(pat[cur_pat])
+
+-- yes, this comes after the global stuff above :/
+set_cur_pat_idx = function(i)
+  cur_pat = i
+  local p = pat[cur_pat]
+  seq:set_pattern(p)
+end
+
+Gui = include('lib/grid_ui')
+
 clk = nil
 
 grid_timer = nil
@@ -34,7 +46,7 @@ load_all_patterns = function()
 end
 
 init = function()
-  local p = pat[1]
+  local p = pat[cur_pat]
   grid_timer = metro.init()
   grid_timer.event = function() 
     g:refresh()
@@ -90,7 +102,7 @@ end
 
 g = grid.connect(1)
 gui = Gui.new()
-gui:set_pattern(pat[1])
+gui:set_pattern(pat[cur_pat])
 
 g.key = function(x, y, z)
   --print(''..x..','..y..','..z)
@@ -101,7 +113,7 @@ end
 enc = function(n, d)
   if n == 2 then
     local off = gui.step_offset + d
-    if off < 1 then off = 1
+    if off < 0 then off = 0
     elseif off > Pattern.MAX_LENGTH - 16 then off = Pattern.MAX_LENGTH - 16
     end
     gui.step_offset = off
@@ -119,10 +131,6 @@ enc = function(n, d)
 end
 
 key = function(n, z)
--- ALSO NOT A GOOD IDEA I GUESS
-  -- if n==1 and z > 0 then 
-  --   save_all_patterns()
-  -- end
 end
 
 redraw = function()
