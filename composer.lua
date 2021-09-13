@@ -6,8 +6,9 @@ Gui = include('lib/grid_ui')
 
 engine.name = 'PolyPerc'
 
+NUM_PATTERNS = 16
 pat = {}
-for i=1,16 do 
+for i=1,NUM_PATTERNS do 
   pat[i] = Pattern.new() 
 end
 
@@ -16,30 +17,42 @@ clk = nil
 
 grid_timer = nil
 
+save_all_patterns = function()
+  print('saving patterns...')
+  for i=1,NUM_PATTERNS do
+    pat[i]:save('pattern_'..i)
+  end
+  print('...done saving patterns.')
+end
+
+load_all_patterns = function()
+  for i=1,NUM_PATTERNS do
+    pat[i]:load('pattern_'..i)
+  end
+end
+
 init = function()
   local p = pat[1]
-  p.stages[1]:set_noteon(60 + 12)
-  p.stages[1]:set_noteon(64 + 12)
-  p.stages[1]:set_noteon(67 + 12)
-  
-  p.stages[5]:set_noteon(60 + 12 + 7)
-  p.stages[5]:set_noteon(64 + 12 + 7)
-  p.stages[5]:set_noteon(67 + 12 + 7)
-  
-  p.stages[9]:set_noteon(48)
- 
- grid_timer = metro.init()
- grid_timer.event = function() 
-   g:refresh()
- end
- grid_timer.time = 1/15
- grid_timer:start()
+  grid_timer = metro.init()
+  grid_timer.event = function() 
+    g:refresh()
+  end
+  grid_timer.time = 1/15
+  grid_timer:start()
     
- clk = clock.run(clock_loop)
+  clk = clock.run(clock_loop)
  
   -- TODO:
   -- start/stop/reset handlers
   -- ...
+  
+  load_all_patterns()
+  
+end
+
+cleanup = function()
+  print('cleanup?')
+  save_all_patterns()
 end
 
 cur_stage = nil
@@ -48,8 +61,9 @@ clock_loop = function()
     cur_stage = seq:step()
     --print("stepping (composer)...")
     if cur_stage == nil then
-    --print("stage data was nil!")
+      print("stage data was nil!")
     else
+      --print('playing stage index: '..seq.idx)
       for num=0,127 do
         if cur_stage:test_noteon(num) then
           local hz = musicutil.note_num_to_freq(num)
@@ -58,7 +72,7 @@ clock_loop = function()
       end
     end
     gui:redraw(g, seq.idx)
-    clock.sync(1/3) -- hm: what is the divisor actually? seems odd
+    clock.sync(1/4)
   end
 end
 
@@ -67,7 +81,7 @@ gui = Gui.new()
 gui:set_pattern(pat[1])
 
 g.key = function(x, y, z)
-  print(''..x..','..y..','..z)
+  --print(''..x..','..y..','..z)
   gui:handle_key(x, y, z)
   gui:redraw(g, seq.idx)
 end 
@@ -84,7 +98,7 @@ enc = function(n, d)
   
   if n == 3 then
     local off = gui.note_offset + d
-    if off < 1 then off = 1
+    if off < 0 then off = 0
     elseif off > 111 then off = 111
     end
     gui.note_offset = off
@@ -92,9 +106,11 @@ enc = function(n, d)
   end
 end
 
-
 key = function(n, z)
-  -- ... ??
+-- ALSO NOT A GOOD IDEA I GUESS
+  -- if n==1 and z > 0 then 
+  --   save_all_patterns()
+  -- end
 end
 
 redraw = function()

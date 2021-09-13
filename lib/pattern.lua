@@ -16,6 +16,7 @@ function Pattern.new()
     return p
 end 
 
+
 Stage.flags = {}
 Stage.flags.NOTEON = 1
 Stage.flags.NOTEOFF = 2
@@ -60,6 +61,7 @@ function Stage:clear_tie(num)
 end
 
 function Stage:test_noteon(num)
+  --print('test noteon; num = '..num)
   return (self.data[num] & Stage.flags.NOTEON) > 0
 end
 
@@ -69,6 +71,56 @@ end
 
 function Stage:test_tie(num)
   return (self.data[num] & Stage.flags.TIE) > 0
+end
+
+function Stage:load_data(arr)
+  for note=0,127 do
+    self.data[note] = arr[note+1]
+  end
+end
+
+function Pattern:save(name)
+  local dir = _path.data.."composer/patterns/"
+  os.execute("mkdir -p "..dir)
+  f = io.open(dir..name..'.lua', 'w')
+  f:write('return {\n')
+  for stage=1,Pattern.MAX_LENGTH do
+    f:write('  { ')
+    local s = self.stages[stage]
+    for note=0,127 do
+      f:write(s.data[note])
+      f:write(', ')
+    end
+    f:write(' },\n')
+  end
+  f:write('}\n')
+  f:close()
+end
+
+
+function Pattern:load(name)
+  local location = _path.data.."composer/patterns/"..name..'.lua'
+  local f = io.open(location, 'r')
+  if f == nil then
+    print("failed to open pattern file: "..location)
+    return
+  end
+  io.close(f)
+  
+  local data = dofile(location)
+  
+  for stage=1,Pattern.MAX_LENGTH do
+    local s = self.stages[stage]
+    s:load_data(data[stage])
+  end
+end
+
+function Pattern:clear() 
+  for stage=1,Pattern.MAX_LENGTH do
+    for note=0,127 do
+      self.stages[stage].data[note] = 0
+    end
+  end
 end
 
 Pattern.Stage = Stage
