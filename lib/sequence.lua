@@ -31,4 +31,8 @@ function Sequence:step()
   return stage
 end 
 
+function Sequence:reset()
+  self.idx = 0
+end
+
 return Sequence

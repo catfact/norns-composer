@@ -16,7 +16,6 @@ function Pattern.new()
     return p
 end 
 
-
 Stage.flags = {}
 Stage.flags.NOTEON = 1
 Stage.flags.TIE = 2
@@ -66,10 +65,6 @@ function Stage:load_data(arr)
 end
 
 function Stage:load_sparse_data(arr)
-  -- for k,v in pairs(arr) do
-  --   print(''..k..' = '..v)
-  --   self.data[k] = v
-  -- end
   for note=0,127 do
     if arr[note] ~= nil then
       self.data[note] = arr[note]
@@ -91,8 +86,6 @@ function Pattern:save(name)
       if s.data[note] ~= 0 then
         f:write('['..note..']='..s.data[note]..', ')
       end
-      --f:write(s.data[note])
-      --f:write(', ')
     end
     f:write(' },\n')
   end
@@ -115,7 +108,6 @@ function Pattern:load(name)
   for stage=1,Pattern.MAX_LENGTH do
     local s = self.stages[stage]
     s:load_sparse_data(data[stage])
-    --s:load_data(data[stage])
   end
 end
 

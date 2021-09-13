@@ -1,5 +1,25 @@
-musicutil = require ('musicutil')
+-- COMPOSER.
+--
+-- polyphonic piano roll pattern sequencer.
+-- for when everything else on norns is too weird.
+--
+-- requires grid.
+--
+-- E1: change current pattern length
+-- E2: move grid editing window on note axis
+-- E3: move grid editing window on time axis
+--
+-- K1: (nothing)
+-- K2 (lift): stop if playing, reset if stopped
+-- K3 (lift): play if stopped, reset if playing
+--
+-- grid:
+-- press keys to toggle notes on and off.
+-- lower right key toggles pattern selection (top row)
+--
+-- TODO: midi output, ties, engine
 
+musicutil = require ('musicutil')
 
 Pattern = include('lib/pattern')
 Sequence = include('lib/sequence')
@@ -52,7 +72,7 @@ init = function()
   grid_timer.event = function() 
     g:refresh()
   end
-  grid_timer.time = 1/15
+  grid_timer.time = 1/30
   grid_timer:start()
   
   
@@ -95,10 +115,13 @@ init = function()
   
   load_all_patterns()
   
+  params:default()
+  
 end
 
 cleanup = function()
   print('cleanup?')
+  params:write()
   save_all_patterns()
 end
 
@@ -107,11 +130,9 @@ clock_loop = function()
   while true do
     if running then
       cur_stage = seq:step()
-      --print("stepping (composer)...")
       if cur_stage == nil then
         print("stage data was nil!")
       else
-        --print('playing stage index: '..seq.idx)
         for num=0,127 do
           if cur_stage:test_noteon(num) then
             local hz = musicutil.note_num_to_freq(num)
@@ -164,29 +185,85 @@ enc = function(n, d)
 end
 
 key = function(n, z)
+  if n == 2 then
+    if z > 0 then
+      stop_key_held = true
+    else
+      if running then
+        running = false
+      else
+        seq:reset()
+      end
+      stop_key_held = false
+    end
+  end
+  if n == 3 then
+    if z > 0 then
+      play_key_held = true
+    else 
+      if running then
+        seq:reset()
+      else
+      running = true;
+      end
+      play_key_held = false
+    end
+  end
+  
 end
 
 redraw = function()
   screen.clear()
-  screen.font_face(3) -- idk
+  screen.font_face(6) -- idk
   screen.aa(0)
-  screen.font_size(12)
+  screen.font_size(16)
+  
   screen.move(0, 12)
   screen.text("pat.:")
   screen.move(40, 12)
   screen.text(cur_pat)
+  
   screen.move(0, 24)
   screen.text("len.:")
   screen.move(40, 24)
   screen.text(pat[cur_pat].length)
+  
   screen.move(0, 36)
   screen.text("note:")
   screen.move(40, 36)
   screen.text(gui.note_offset)
+  
   screen.move(0, 48)
   screen.text("step:")
   screen.move(40, 48)
   screen.text(gui.step_offset)
+  
+  screen.font_size(12)
+  screen.level(15)
+  screen.move(36, 56)
+  if stop_key_held then
+    screen.blend_mode(12)
+  else
+    screen.blend_mode(0)
+  end
+  if running then
+    screen.text('STOP')
+  else
+    screen.text('RESET')
+  end
+
+  ---- play/stop labels
+  screen.move(78, 56)
+  if play_key_held then
+    screen.blend_mode(12)
+  else
+    screen.blend_mode(0)
+  end
+  if running then
+    screen.text('RESET')
+  else
+    screen.text('PLAY')
+  end
   screen.update()
 end 
 
