@@ -39,6 +39,14 @@ init = function()
   end
   grid_timer.time = 1/15
   grid_timer:start()
+  
+  
+  screen_timer = metro.init()
+  screen_timer.event = function() 
+    redraw()
+  end
+  screen_timer.time = 1/15
+  screen_timer:start()
     
   clk = clock.run(clock_loop)
  
@@ -115,5 +123,17 @@ end
 
 redraw = function()
   screen.clear()
+  screen.font_face(3) -- idk
+  screen.aa(0)
+  screen.font_size(16)
+  screen.move(0, 20)
+  screen.text("note:")
+  screen.move(40, 20)
+  screen.text(gui.note_offset)
+  screen.move(0, 40)
+  screen.text("step:")
+  screen.move(40, 40)
+  screen.text(gui.step_offset)
+  screen.update()
 end 
 
