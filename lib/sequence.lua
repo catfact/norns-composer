@@ -9,7 +9,7 @@ Sequence.__index = Sequence
 function Sequence.new(p) 
     local s = setmetatable({}, Sequence)
     s.pattern = p
-    s.idx = 1
+    s.idx = 0 -- special initial value, normally in [1, length]
     return s
 end 
 
@@ -21,12 +21,12 @@ end
 function Sequence:step()
   --print('stepping (sequence)...')
   local stage = nil
-  if self.pattern ~= nil then
-    stage = self.pattern.stages[self.idx]
-  end
   self.idx = self.idx + 1
   if self.idx > self.pattern.length then
     self.idx = 1
+  end
+  if self.pattern ~= nil then
+    stage = self.pattern.stages[self.idx]
   end
   return stage
 end 
