@@ -24,6 +24,7 @@ set_cur_pat_idx = function(i)
 end
 
 Gui = include('lib/grid_ui')
+g = grid.connect(1)
 
 clk = nil
 
@@ -111,7 +112,23 @@ g.key = function(x, y, z)
 end 
 
 enc = function(n, d)
+  if n == 1 then
+    local l = pat[cur_pat].length
+    l = l + d
+    if l < 1 then l = 1 end
+    if l > Pattern.MAX_LENGTH then l = Pattern.MAX_LENGTH end
+    pat[cur_pat].length = l
+  end
+  
   if n == 2 then
+    local off = gui.note_offset + d
+    if off < 0 then off = 0
+    elseif off > 111 then off = 111
+    end
+    gui.note_offset = off
+    gui:redraw(g, seq.idx)
+  end
+  if n == 3 then
     local off = gui.step_offset + d
     if off < 0 then off = 0
     elseif off > Pattern.MAX_LENGTH - 16 then off = Pattern.MAX_LENGTH - 16
@@ -120,14 +137,6 @@ enc = function(n, d)
     gui:redraw(g, seq.idx)
   end
   
-  if n == 3 then
-    local off = gui.note_offset + d
-    if off < 0 then off = 0
-    elseif off > 111 then off = 111
-    end
-    gui.note_offset = off
-    gui:redraw(g, seq.idx)
-  end
 end
 
 key = function(n, z)
@@ -138,14 +147,18 @@ redraw = function()
   screen.font_face(3) -- idk
   screen.aa(0)
   screen.font_size(16)
-  screen.move(0, 20)
+  screen.move(0, 16)
   screen.text("note:")
-  screen.move(40, 20)
+  screen.move(40, 16)
   screen.text(gui.note_offset)
-  screen.move(0, 40)
+  screen.move(0, 32)
   screen.text("step:")
-  screen.move(40, 40)
+  screen.move(40, 32)
   screen.text(gui.step_offset)
+  screen.move(0, 48)
+  screen.text("len:")
+  screen.move(40, 48)
+  screen.text(pat[cur_pat].length)
   screen.update()
 end 
 
