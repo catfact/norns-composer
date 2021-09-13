@@ -4,14 +4,15 @@ Pattern.__index = Pattern
 local Stage = {}
 Stage.__index = Stage
 
-Pattern.MAX_LEN = 64
+Pattern.MAX_LENGTH = 64
 
 function Pattern.new() 
     local p = setmetatable({}, Pattern)
     p.stages = {}
-    for i=1,Pattern.MAX_LEN do
+    for i=1,Pattern.MAX_LENGTH do
       p.stages[i] = Stage.new()
     end
+    p.length = Pattern.MAX_LENGTH
     return p
 end 
 
@@ -56,6 +57,18 @@ end
 
 function Stage:clear_tie(num)
     self.data[num] = self.data[num] & Stage.masks.TIE
+end
+
+function Stage:test_noteon(num)
+  return (self.data[num] & Stage.flags.NOTEON) > 0
+end
+
+function Stage:test_noteoff(num)
+  return (self.data[num] & Stage.flags.NOTEOFF) > 0
+end
+
+function Stage:test_tie(num)
+  return (self.data[num] & Stage.flags.TIE) > 0
 end
 
 Pattern.Stage = Stage
