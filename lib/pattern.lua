@@ -19,12 +19,10 @@ end
 
 Stage.flags = {}
 Stage.flags.NOTEON = 1
-Stage.flags.NOTEOFF = 2
-Stage.flags.TIE = 4
+Stage.flags.TIE = 2
 
 Stage.masks = {}
 Stage.masks.NOTEON = 0xff ~ Stage.flags.NOTEON
-Stage.masks.NOTEOFF = 0xff ~ Stage.flags.NOTEOFF
 Stage.masks.TIE = 0xff ~ Stage.flags.TIE
 
 function Stage.new() 
@@ -40,20 +38,12 @@ function Stage:set_noteon(num)
     self.data[num] = self.data[num] | Stage.flags.NOTEON
 end
 
-function Stage:set_noteoff(num)
-    self.data[num] = self.data[num] | Stage.flags.NOTEOFF
-end
-
 function Stage:set_tie(num)
     self.data[num] = self.data[num] | Stage.flags.TIE
 end
 
 function Stage:clear_noteon(num)
     self.data[num] = self.data[num] & Stage.masks.NOTEON
-end
-
-function Stage:clear_noteoff(num)
-    self.data[num] = self.data[num] & Stage.masks.NOTEOFF
 end
 
 function Stage:clear_tie(num)
@@ -63,10 +53,6 @@ end
 function Stage:test_noteon(num)
   --print('test noteon; num = '..num)
   return (self.data[num] & Stage.flags.NOTEON) > 0
-end
-
-function Stage:test_noteoff(num)
-  return (self.data[num] & Stage.flags.NOTEOFF) > 0
 end
 
 function Stage:test_tie(num)
@@ -79,6 +65,20 @@ function Stage:load_data(arr)
   end
 end
 
+function Stage:load_sparse_data(arr)
+  -- for k,v in pairs(arr) do
+  --   print(''..k..' = '..v)
+  --   self.data[k] = v
+  -- end
+  for note=0,127 do
+    if arr[note] ~= nil then
+      self.data[note] = arr[note]
+    else
+      self.data[note] = 0
+    end
+  end
+end
+
 function Pattern:save(name)
   local dir = _path.data.."composer/patterns/"
   os.execute("mkdir -p "..dir)
@@ -88,8 +88,11 @@ function Pattern:save(name)
     f:write('  { ')
     local s = self.stages[stage]
     for note=0,127 do
-      f:write(s.data[note])
-      f:write(', ')
+      if s.data[note] ~= 0 then
+        f:write('['..note..']='..s.data[note]..', ')
+      end
+      --f:write(s.data[note])
+      --f:write(', ')
     end
     f:write(' },\n')
   end
@@ -111,7 +114,8 @@ function Pattern:load(name)
   
   for stage=1,Pattern.MAX_LENGTH do
     local s = self.stages[stage]
-    s:load_data(data[stage])
+    s:load_sparse_data(data[stage])
+    --s:load_data(data[stage])
   end
 end
 

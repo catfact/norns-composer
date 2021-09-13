@@ -17,6 +17,8 @@ clk = nil
 
 grid_timer = nil
 
+running = true
+
 save_all_patterns = function()
   print('saving patterns...')
   for i=1,NUM_PATTERNS do
@@ -66,20 +68,22 @@ end
 cur_stage = nil
 clock_loop = function()
   while true do
-    cur_stage = seq:step()
-    --print("stepping (composer)...")
-    if cur_stage == nil then
-      print("stage data was nil!")
-    else
-      --print('playing stage index: '..seq.idx)
-      for num=0,127 do
-        if cur_stage:test_noteon(num) then
-          local hz = musicutil.note_num_to_freq(num)
-          engine.hz(hz)
+    if running then
+      cur_stage = seq:step()
+      --print("stepping (composer)...")
+      if cur_stage == nil then
+        print("stage data was nil!")
+      else
+        --print('playing stage index: '..seq.idx)
+        for num=0,127 do
+          if cur_stage:test_noteon(num) then
+            local hz = musicutil.note_num_to_freq(num)
+            engine.hz(hz)
+          end
         end
       end
+      gui:redraw(g, seq.idx)
     end
-    gui:redraw(g, seq.idx)
     clock.sync(1/4)
   end
 end
